@@ -2,6 +2,11 @@ package Controller;
 
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import java.sql.*;
+import DAO.*;
+import Model.Account;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import Util.*;
 
 /**
  * TODO: You will need to write your own endpoints and handlers for your controller. The endpoints you will need can be
@@ -15,9 +20,27 @@ public class SocialMediaController {
      * @return a Javalin app object which defines the behavior of the Javalin controller.
      */
     public Javalin startAPI() {
+        ObjectMapper o = new ObjectMapper();
+        Connection c = ConnectionUtil.getConnection();
         Javalin app = Javalin.create();
-        app.get("example-endpoint", this::exampleHandler);
-
+        app.post("/register", ctx -> {
+            try{
+                Account b = AccountDAO.register(o.readValue(ctx.body(), Account.class), c);
+                ctx.json(b);
+            }
+            catch (Exception e){
+                ctx.status(400);
+            }
+        });
+        app.post("/login", ctx -> {
+            try{
+                Account b = AccountDAO.login(o.readValue(ctx.body(), Account.class), c);
+                ctx.json(b);
+            }
+            catch (Exception e){
+                ctx.status(401);
+            }
+        });
         return app;
     }
 
