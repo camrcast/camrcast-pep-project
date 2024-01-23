@@ -1,10 +1,10 @@
 package Controller;
-
+import java.util.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.sql.*;
 import DAO.*;
-import Model.Account;
+import Model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import Util.*;
 
@@ -24,21 +24,35 @@ public class SocialMediaController {
         Connection c = ConnectionUtil.getConnection();
         Javalin app = Javalin.create();
         app.post("/register", ctx -> {
-            try{
-                Account b = AccountDAO.register(o.readValue(ctx.body(), Account.class), c);
-                ctx.json(b);
-            }
-            catch (Exception e){
+            Account b = SocialMediaDAO.register(o.readValue(ctx.body(), Account.class), c);
+            if (b.getAccount_id() == -1){
                 ctx.status(400);
+            }
+            else{
+                ctx.json(b);
             }
         });
         app.post("/login", ctx -> {
-            try{
-                Account b = AccountDAO.login(o.readValue(ctx.body(), Account.class), c);
+            Account b = SocialMediaDAO.login(o.readValue(ctx.body(), Account.class), c);
+            if (b.getAccount_id() == -1){
+                ctx.status(401);
+            }
+            else{
                 ctx.json(b);
             }
-            catch (Exception e){
-                ctx.status(401);
+        });
+        app.get("/messages", ctx -> {
+            List<Message> b = SocialMediaDAO.getAllMessages(c);
+            ctx.json(b);
+        });
+        app.get("/messages/{message_id}", ctx -> {
+            String messid = ctx.pathParam("message_id");
+            Message b = SocialMediaDAO.getMessage(Integer.parseInt(messid), c);
+            if (b.getMessage_id() == -1){
+                ctx.status(200);
+            }
+            else{
+                ctx.json(b);
             }
         });
         return app;
