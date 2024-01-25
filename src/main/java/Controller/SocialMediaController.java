@@ -55,6 +55,26 @@ public class SocialMediaController {
                 ctx.json(b);
             }
         });
+        app.delete("/messages/{message_id}", ctx -> {
+            int messid = Integer.parseInt(ctx.pathParam("message_id"));
+            Message b = SocialMediaDAO.deleteMessage(messid, c);
+            if (b.getMessage_id() == -1){
+                ctx.status(200);
+            }
+            else{
+                ctx.json(b);
+            }
+        });
+        app.patch("/messages/{message_id}", ctx -> {
+            int messid = Integer.parseInt(ctx.pathParam("message_id"));
+            Message b = SocialMediaDAO.updateMessage(o.readValue(ctx.body(), Message.class).getMessage_text(), messid, c);
+            if (b.getMessage_id() == -1){
+                ctx.status(400);
+            }
+            else{
+                ctx.json(b);
+            }
+        });
         return app;
     }
 

@@ -37,8 +37,17 @@ public class SocialMediaDAO{
         return login(a,c);
     }
 
-    public static boolean deleteMessage(Message m, Connection c){
-        return true;
+    public static Message deleteMessage(int id, Connection c){
+        try{
+            Message m = getMessage(id, c);
+            PreparedStatement ps = c.prepareStatement("DELETE FROM message WHERE message_id = ?");
+            ps.setInt(1, id);
+            ps.execute();
+            return m;
+        }
+        catch(SQLException e){
+            return new Message(-1, "", 0);
+        }
     }
 
     public static boolean postMessage(Message m, Connection c){
@@ -77,5 +86,21 @@ public class SocialMediaDAO{
             return mess;
         }
         return mess;
+    }
+
+    public static Message updateMessage(String text, int id, Connection c){
+        if (text.length() > 255 || text.isBlank()){
+            return new Message(-1, -1, "", 0);
+        }
+        try{
+            PreparedStatement ps = c.prepareStatement("UPDATE message SET message_text = ? WHERE message_id = ?");
+            ps.setString(1, text);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+            return getMessage(id, c);
+        }
+        catch(SQLException e){
+            return new Message(-1, -1, "", 0);
+        }
     }
 }
