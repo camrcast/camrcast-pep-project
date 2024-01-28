@@ -75,6 +75,20 @@ public class SocialMediaController {
                 ctx.json(b);
             }
         });
+        app.post("/messages", ctx -> {
+            Message b = SocialMediaDAO.postMessage(o.readValue(ctx.body(), Message.class), c);
+            if (b.getMessage_id() == -1){
+                ctx.status(400);
+            }
+            else{
+                ctx.json(b);
+            }
+        });
+        app.get("/accounts/{account_id}/messages", ctx -> {
+            int accid = Integer.parseInt(ctx.pathParam("account_id"));
+            List<Message> b = SocialMediaDAO.getMessagesByUser(accid, c);
+            ctx.json(b);
+        });
         return app;
     }
 
